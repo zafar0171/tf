@@ -26,8 +26,7 @@ def fetch_news(rss_url):
     
     headlines = []
     urls = []
-    
-    # Iterate through each item in the RSS feed
+  
     for item in root.findall('./channel/item'):
         headline = item.find('title').text
         url = item.find('link').text
@@ -36,34 +35,22 @@ def fetch_news(rss_url):
     
     return headlines, urls
 
-# Fetch and parse the news
 rss_url = 'https://news.google.com/news/rss/headlines/section/topic/BUSINESS.IN'
 headlines, urls = fetch_news(rss_url)
 
-# Create a DataFrame
 data = {'Headline': headlines, 'URL': urls}
 df = pd.DataFrame(data)
 
-# Display the DataFrame
 print(df)
-
-# Convert DataFrame to list of tuples
 stocksTupleList = list(df.itertuples(index=False, name=None))
-
-# Insert data into MySQL
+#Data insertion
 mydb = get_connection()
 if mydb:
     mycursor = mydb.cursor()
 
     query = """INSERT INTO goog_rss (Headline, url) VALUES (%s, %s)"""
-
-    # Use executemany to insert multiple rows at once
     mycursor.executemany(query, stocksTupleList)
-
-    # Commit the transaction
     mydb.commit()
-
-    # Close the cursor and connection
     mycursor.close()
     mydb.close()
 else:
